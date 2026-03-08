@@ -14,4 +14,4 @@
 
  Here is the prototype, waiting for version v1 of PCB. A v2 might feature an RGB led instead.
 
- 
+![20260308_143006](https://github.com/user-attachments/assets/27d30efa-58a1-4632-96ae-dd62605cc028)
