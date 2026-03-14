@@ -113,6 +113,7 @@ void loop() {
     return;
   }  
 
+  // when not recording for a while, enter light sleep mode to save power.
   // Keep delay long enough, sleep messes up the Serial connection 
   // and prevents uploading new code even after reset, until the next unplug/plug.
   if (millis() - lastActivation > 30000) {
@@ -121,7 +122,7 @@ void loop() {
     gpio_wakeup_enable(GPIO_NUM_5, GPIO_INTR_LOW_LEVEL);
     esp_sleep_enable_gpio_wakeup();
     esp_light_sleep_start();
-    // Beware, after this, Serial no longer works (logs, upload, ...) 
+    // Beware, after this, USB Serial no longer works (logs, upload, ...) 
     // until the next time it is unplugged / plugged in.
     lastActivation = millis();
 
