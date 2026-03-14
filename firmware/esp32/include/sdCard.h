@@ -16,7 +16,9 @@ public:
     void write(const uint8_t* buf, size_t size);
     void closeCurrentFile();
     void writeWavHeader(int sampleRate, int bitsPerSample, int channels, int dataSize);
-    boolean initNewFile() ;
+    boolean initNewFile();
+    String readFile(const char* fileName);
+    bool writeFile(const char* fileName, const String& content, bool append = false);
 
 private:
     int csPin;

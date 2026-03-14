@@ -8,6 +8,7 @@
 #include "led.h"
 #include <esp_sleep.h>
 #include "sdCard.h"
+#include "button.h"
 
 #define I2S_BCK_PIN D1
 #define I2S_WS_PIN D2
@@ -30,14 +31,12 @@ time_t lastFileSwitch = 0;
 time_t lastActivation = 0;
 bool sdPresent = false;
 
-boolean buttonPressed = false;
-time_t lastButtonPressTime = 0;
-
 Led led(LED_PIN);
 BlinkMode slowMode(40, 2000, 0);      // 100ms on, 2s off, infinite
 BlinkMode fastMode(100, 100, 0);       // 100ms on/off, infinite
 BlinkMode twiceMode(400, 400, 2);      // 400ms on/off, 2 blinks max
 SDCard sdCard(SD_CS_PIN, SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN);
+Button button(BUTTON_PIN);
  
 const i2s_config_t i2s_config = {
   .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_TX),
@@ -68,8 +67,6 @@ void setup() {
   WiFi.mode(WIFI_OFF);
   // Turn off Bluetooth as well to save power and avoid interference
   btStop();
-  
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
    
   sdPresent = SD.begin(SD_CS_PIN);
   if (!sdPresent) {
@@ -136,17 +133,13 @@ void loop() {
     // fflush(stdout);
   }
   
-  if (digitalRead(BUTTON_PIN) == LOW) {
-    lastButtonPressTime = millis();
-    buttonPressed = true;
-  } else {
-    if (buttonPressed && millis() - lastButtonPressTime > 50) { // Debounce
-      if (isRecording) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
-      buttonPressed = false;
+  button.run();
+  ButtonState buttonState = button.readState();
+  if (buttonState == ButtonState::SHORT_PRESS) {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
     }
   }
   

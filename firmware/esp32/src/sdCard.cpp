@@ -88,3 +88,48 @@ void SDCard::writeWavHeader(int sampleRate, int bitsPerSample, int channels, int
 
     currentFile.write(header, WAVE_HEADER_SIZE);
 }
+
+String SDCard::readFile(const char* fileName) {
+    log_i("Reading file: %s", fileName);
+    
+    if (!SD.exists(fileName)) {
+        log_w("File does not exist: %s", fileName);
+        return String();
+    }
+    
+    File file = SD.open(fileName, FILE_READ);
+    if (!file) {
+        log_e("Could not open file for reading: %s", fileName);
+        return String();
+    }
+    
+    String content = "";
+    while (file.available()) {
+        content += (char)file.read();
+    }
+    file.close();
+    
+    log_i("File read successfully: %s", fileName);
+    return content;
+}
+
+bool SDCard::writeFile(const char* fileName, const String& content, bool append) {
+    log_i("Writing to file: %s (append: %d)", fileName, append ? 1 : 0);
+    
+    File file = SD.open(fileName, append ? FILE_APPEND : FILE_WRITE);
+    if (!file) {
+        log_e("Could not open file for writing: %s", fileName);
+        return false;
+    }
+    
+    size_t bytesWritten = file.print(content);
+    file.close();
+    
+    if (bytesWritten > 0) {
+        log_i("File written successfully: %s (%d bytes)", fileName, bytesWritten);
+        return true;
+    } else {
+        log_w("No bytes written to file: %s", fileName);
+        return false;
+    }
+}
