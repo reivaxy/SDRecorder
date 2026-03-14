@@ -1,4 +1,5 @@
 #include "main.h"
+#include "recorderServer.h"
 
 #define I2S_BCK_PIN D1
 #define I2S_WS_PIN D2
@@ -13,6 +14,7 @@
 #define LED_PIN D4
 
 #define I2S_NUM I2S_NUM_0
+#define DEFAULT_SLEEP_DELAY 30000
 
 bool isRecording = false;
 unsigned long lastBlinkTime = 0;
@@ -25,9 +27,11 @@ Led led(LED_PIN);
 BlinkMode slowMode(40, 2000, 0);      // 100ms on, 2s off, infinite
 BlinkMode fastMode(100, 100, 0);       // 100ms on/off, infinite
 BlinkMode twiceMode(400, 400, 2);      // 400ms on/off, 2 blinks max
+BlinkMode threeTimesMode(100, 100, 3);    // 200ms on/off, 3 blinks max
 SDCard sdCard(SD_CS_PIN, SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN);
 Button button(BUTTON_PIN);
 Preferences settings;
+RecorderServer* recorderServer = nullptr;
  
 const i2s_config_t i2s_config = {
   .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_TX),
@@ -75,6 +79,9 @@ void setup() {
     led.setMode(twiceMode);
     lastActivation = millis();
   }
+  
+  // Initialize RecorderServer
+  recorderServer = new RecorderServer(&settings, &sdCard);
 }
 
 void startRecording() { 
@@ -99,7 +106,9 @@ void stopRecording() {
 }
 
 void loop() {  
+  button.run();
   led.run();
+  recorderServer->run();
   
  
   if (!sdPresent) {
@@ -109,7 +118,7 @@ void loop() {
   // when not recording for a while, enter light sleep mode to save power.
   // Keep delay long enough, sleep messes up the Serial connection 
   // and prevents uploading new code even after reset, until the next unplug/plug.
-  if (millis() - lastActivation > 30000) {
+  if (millis() - lastActivation > 3000000 && !recorderServer->isRunning()) {
     log_i("No activity, going to light sleep...");
     fflush(stdout);
     gpio_wakeup_enable(GPIO_NUM_5, GPIO_INTR_LOW_LEVEL);
@@ -129,7 +138,6 @@ void loop() {
     // fflush(stdout);
   }
   
-  button.run();
   ButtonState buttonState = button.readState();
   if (buttonState == ButtonState::SHORT_PRESS) {
     if (isRecording) {
@@ -137,6 +145,17 @@ void loop() {
     } else {
       startRecording();
     }
+  } else if (buttonState == ButtonState::LONG_PRESS) {
+    if (recorderServer->isRunning()) {
+      led.setMode(threeTimesMode);
+      recorderServer->stop();
+      log_i("Web server stopped.");
+    } else {
+      led.setMode(threeTimesMode);
+      recorderServer->start();
+      log_i("Web server started.");
+    }
+    lastActivation = millis();
   }
   
 
