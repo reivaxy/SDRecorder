@@ -1,14 +1,4 @@
-
-#include <Arduino.h>
-#include <SD.h>
-#include <SPI.h>
-#include <driver/i2s.h>
-#include <FS.h>
-#include <WiFi.h>
-#include "led.h"
-#include <esp_sleep.h>
-#include "sdCard.h"
-#include "button.h"
+#include "main.h"
 
 #define I2S_BCK_PIN D1
 #define I2S_WS_PIN D2
@@ -37,6 +27,7 @@ BlinkMode fastMode(100, 100, 0);       // 100ms on/off, infinite
 BlinkMode twiceMode(400, 400, 2);      // 400ms on/off, 2 blinks max
 SDCard sdCard(SD_CS_PIN, SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN);
 Button button(BUTTON_PIN);
+Preferences settings;
  
 const i2s_config_t i2s_config = {
   .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_TX),
@@ -67,6 +58,9 @@ void setup() {
   WiFi.mode(WIFI_OFF);
   // Turn off Bluetooth as well to save power and avoid interference
   btStop();
+  
+  // Initialize preferences
+  settings.begin("SDRecorder", false);
    
   sdPresent = SD.begin(SD_CS_PIN);
   if (!sdPresent) {
@@ -106,6 +100,8 @@ void stopRecording() {
 
 void loop() {  
   led.run();
+  
+ 
   if (!sdPresent) {
     return;
   }  

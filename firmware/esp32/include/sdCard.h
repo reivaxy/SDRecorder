@@ -8,6 +8,7 @@
 
 #define SAMPLE_RATE 48000  // DVD quality
 #define WAVE_HEADER_SIZE 44
+#define MAX_FILES 100
 
 class SDCard {
 public:
@@ -19,6 +20,8 @@ public:
     boolean initNewFile();
     String readFile(const char* fileName);
     bool writeFile(const char* fileName, const String& content, bool append = false);
+    int getFilesCount();
+    const char* getFileName(int index);
 
 private:
     int csPin;
@@ -28,6 +31,8 @@ private:
     File currentFile;
     int fileIndex = 1;
     String currentFileName;
+    char* fileNames[MAX_FILES];
+    int fileCount;
 
 };
 
