@@ -1,4 +1,5 @@
 #include "recorderServer.h"
+#include "styles.h"
 
 RecorderServer::RecorderServer(Preferences* settings, SDCard* sdCard)
     : server(80), settings(settings), sdCard(sdCard), running(false) {
@@ -32,8 +33,9 @@ void RecorderServer::start() {
     
     // Register request handlers
     server.on("/", HTTP_GET, [this]() { handleRoot(); });
-    server.on("/settings", HTTP_GET, [this]() { handleGetSettings(); });
-    server.on("/settings", HTTP_POST, [this]() { handlePostSettings(); });
+    server.on("/settings", HTTP_GET, [this]() { handleSettings(); });
+    server.on("/apis/settings", HTTP_GET, [this]() { handleGetSettingsApi(); });
+    server.on("/apis/settings", HTTP_POST, [this]() { handlePostSettingsApi(); });
     server.onNotFound([this]() { handleNotFound(); });
     
     // Start server
@@ -67,11 +69,16 @@ void RecorderServer::handleRoot() {
     server.send(200, "text/html", getHtmlPage());
 }
 
-void RecorderServer::handleGetSettings() {
+void RecorderServer::handleSettings() {
+    log_i("Handling root request");
+    server.send(200, "text/html", getSettingsHtmlPage());
+}
+
+void RecorderServer::handleGetSettingsApi() {
     server.send(200, "application/json", getSettingsJson());
 }
 
-void RecorderServer::handlePostSettings() {
+void RecorderServer::handlePostSettingsApi() {
     if (!server.hasArg("plain")) {
         server.send(400, "application/json", "{\"error\":\"No content\"}");
         return;
@@ -132,97 +139,67 @@ String RecorderServer::getHtmlPage() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Recorder</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <title>SD Recorder - Home</title>
+    )" + String(RECORDER_CSS) + R"(
+</head>
+<body>
+    <div class="container">
+        <h1>SD Recorder</h1>
+        
+        <div class="settings-section">
+            <h2>Usage Instructions</h2>
+            
+            <div class="form-group">
+                <label>📹 Short Button Press</label>
+                <p class="instruction-text-bottom">Start or stop recording audio to the SD card</p>
+            </div>
+            
+            <div class="form-group">
+                <label>🔧 Long Button Press (2+ seconds)</label>
+                <p class="instruction-text">Start or stop the WiFi server for remote control</p>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Device Status</h2>
+            <p class="device-status-text">Device Name: <strong class="device-name" id="device-name">Loading...</strong></p>
+            
+            <button onclick="location.href='/settings'">⚙️ Settings</button>
+            <button onclick="location.href='/files'">📁 File List</button>
+        </div>
+    </div>
+    
+    <script>
+        // Load device name on page load
+        window.addEventListener('load', loadDeviceInfo);
+        
+        function loadDeviceInfo() {
+            fetch('/apis/settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('device-name').textContent = data.device_name || 'SDRecorder';
+                })
+                .catch(error => {
+                    console.error('Error loading device info:', error);
+                    document.getElementById('device-name').textContent = 'SDRecorder';
+                });
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 600px;
-            width: 100%;
-            padding: 40px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .settings-section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        .status {
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: none;
-            text-align: center;
-            font-weight: 600;
-        }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-    </style>
+    </script>
+</body>
+</html>
+    )" ;
+}
+
+
+String RecorderServer::getSettingsHtmlPage() {
+    return R"(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD Recorder Settings</title>
+    )" + String(RECORDER_CSS) + R"(
 </head>
 <body>
     <div class="container">
@@ -263,7 +240,7 @@ String RecorderServer::getHtmlPage() {
         window.addEventListener('load', loadSettings);
         
         function loadSettings() {
-            fetch('/settings')
+            fetch('/apis/settings')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('device_name').value = data.device_name || 'ESP32-Recorder';
@@ -285,7 +262,7 @@ String RecorderServer::getHtmlPage() {
                 sample_rate: parseInt(document.getElementById('sample_rate').value)
             };
             
-            fetch('/settings', {
+            fetch('/apis/settings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -313,5 +290,5 @@ String RecorderServer::getHtmlPage() {
     </script>
 </body>
 </html>
-    )";
+    )" ;
 }

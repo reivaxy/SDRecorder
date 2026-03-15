@@ -28,14 +28,16 @@ private:
     
     // Request handlers
     void handleRoot();
-    void handleGetSettings();
-    void handlePostSettings();
+    void handleGetSettingsApi();
+    void handlePostSettingsApi();
     void handleNotFound();
+    void handleSettings();
     
     // Helper methods
     String getSettingsJson();
     void setSettingsFromJson(const String& json);
     String getHtmlPage();
+    String getSettingsHtmlPage();
 };
 
 #endif
