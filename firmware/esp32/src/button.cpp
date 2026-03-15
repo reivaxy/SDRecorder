@@ -1,7 +1,8 @@
 #include "button.h"
 
-Button::Button(uint8_t pin, unsigned long longPressDuration)
+Button::Button(uint8_t pin, unsigned long longPressDuration, unsigned long veryLongPressDuration)
   : pin(pin), longPressDuration(longPressDuration),
+    veryLongPressDuration(veryLongPressDuration),
     pressStartTime(0), isCurrentlyPressed(false),
     currentState(ButtonState::IDLE), lastDebounceTime(0),
     lastReadValue(HIGH) {
@@ -28,7 +29,9 @@ void Button::run() {
       isCurrentlyPressed = false;
       unsigned long pressDuration = millis() - pressStartTime;
 
-      if (pressDuration >= longPressDuration) {
+      if (pressDuration >= veryLongPressDuration) {
+        currentState = ButtonState::VERY_LONG_PRESS;
+      } else if (pressDuration >= longPressDuration) {
         currentState = ButtonState::LONG_PRESS;
       } else {
         currentState = ButtonState::SHORT_PRESS;

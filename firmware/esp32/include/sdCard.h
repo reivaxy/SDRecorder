@@ -20,8 +20,10 @@ public:
     boolean initNewFile();
     String readFile(const char* fileName);
     bool writeFile(const char* fileName, const String& content, bool append = false);
+    bool deleteFile(const char* fileName);
     int getFilesCount();
     const char* getFileName(int index);
+    String getCurrentFileName() const { return currentFileName; }
 
 private:
     int csPin;
@@ -32,7 +34,7 @@ private:
     int fileIndex = 1;
     String currentFileName;
     char* fileNames[MAX_FILES];
-    int fileCount;
+    int fileCount = 0;
 
 };
 

@@ -21,9 +21,15 @@
 #define PREF_SLEEP_DELAY_S "sleep_delay"
 #define PREF_SLEEP_DELAY_DEFAULT 30
 
+#define PREF_FILE_SWITCH_DELAY_S "switch_delay"
+#define PREF_FILE_SWITCH_DELAY_DEFAULT 60
+
 // Boolean preferences
 #define PREF_DISABLE_LED "disable_led"
 #define PREF_DISABLE_LED_DEFAULT false
+
+#define PREF_RESTART_SERVER "restart_server"
+#define PREF_RESTART_SERVER_DEFAULT false
 
 
 

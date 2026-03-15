@@ -4,7 +4,9 @@
 const RecorderPreferences::SettingMetadata RecorderPreferences::settingsMetadata[] = {
   {PREF_DEVICE_NAME, "string", PREF_DEVICE_NAME_DEFAULT, 0, 0.0f, false, "Device Name"},
   {PREF_DISABLE_LED, "bool", nullptr, 0, 0.0f, PREF_DISABLE_LED_DEFAULT, "Disable LED"},
+  {PREF_RESTART_SERVER, "bool", nullptr, 0, 0.0f, PREF_RESTART_SERVER_DEFAULT, "Restart Server on Reset"},
   {PREF_SLEEP_DELAY_S, "int", nullptr, PREF_SLEEP_DELAY_DEFAULT, 0.0f, false, "Sleep Delay (s)"},
+  {PREF_FILE_SWITCH_DELAY_S, "int", nullptr, PREF_FILE_SWITCH_DELAY_DEFAULT, 0.0f, false, "File Switch Delay (s)"},
   {PREF_AP_SSID, "string", PREF_AP_SSID_DEFAULT, 0, 0.0f, false, "Access Point SSID"},
   {PREF_AP_PASSWORD, "string", PREF_AP_PASSWORD_DEFAULT, 0, 0.0f, false, "Access Point Password"},
 };

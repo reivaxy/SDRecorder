@@ -1,6 +1,9 @@
 #include "sdCard.h"
 
-SDCard::SDCard(int csPin, int sckPin, int misoPin, int mosiPin) : csPin(csPin), sckPin(sckPin), misoPin(misoPin), mosiPin(mosiPin) {}
+SDCard::SDCard(int csPin, int sckPin, int misoPin, int mosiPin)
+    : csPin(csPin), sckPin(sckPin), misoPin(misoPin), mosiPin(mosiPin), fileCount(0) {
+    memset(fileNames, 0, sizeof(fileNames));
+}
 
 bool SDCard::begin() {
     SPI.begin(sckPin, misoPin, mosiPin, csPin);
@@ -132,4 +135,68 @@ bool SDCard::writeFile(const char* fileName, const String& content, bool append)
         log_w("No bytes written to file: %s", fileName);
         return false;
     }
+}
+
+bool SDCard::deleteFile(const char* fileName) {
+    log_i("Deleting file: %s", fileName);
+    
+    if (!SD.exists(fileName)) {
+        log_w("File does not exist: %s", fileName);
+        return false;
+    }
+    
+    if (SD.remove(fileName)) {
+        log_i("File deleted successfully: %s", fileName);
+        return true;
+    } else {
+        log_e("Failed to delete file: %s", fileName);
+        return false;
+    }
+}
+
+int SDCard::getFilesCount() {
+    // Free previously scanned file names
+    for (int i = 0; i < fileCount; i++) {
+        if (fileNames[i]) {
+            free(fileNames[i]);
+            fileNames[i] = nullptr;
+        }
+    }
+    fileCount = 0;
+
+    File root = SD.open("/");
+    if (!root || !root.isDirectory()) {
+        log_e("Failed to open SD root directory");
+        return 0;
+    }
+
+    File entry = root.openNextFile();
+    while (entry && fileCount < MAX_FILES) {
+        if (!entry.isDirectory()) {
+            String name = String(entry.name());
+            // Normalize: ensure leading '/'
+            if (!name.startsWith("/")) {
+                name = "/" + name;
+            }
+            // Only include WAV files (case-insensitive)
+            String nameLower = name;
+            nameLower.toLowerCase();
+            if (nameLower.endsWith(".wav")) {
+                fileNames[fileCount] = strdup(name.c_str());
+                fileCount++;
+            }
+        }
+        entry = root.openNextFile();
+    }
+    root.close();
+
+    log_i("Found %d WAV files on SD card", fileCount);
+    return fileCount;
+}
+
+const char* SDCard::getFileName(int index) {
+    if (index < 0 || index >= fileCount) {
+        return nullptr;
+    }
+    return fileNames[index];
 }

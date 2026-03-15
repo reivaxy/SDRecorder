@@ -2,13 +2,15 @@
 
  This is a tiny audio recorder with a small battery, saving .wav files on a SD card.
  
- Preliminary version does not have wifi nor bluetooth connection yet.
+ About 90% of the code was written by model Claude Haiku 4.5 through github Copilot, with very, very little editing.
 
- Click once on the push button to start recording, and once again to stop recording.
+ Click briefly on the push button to start recording, and once again to stop recording.
 
- New files are created every X seconds.
+ Click for at least two seconds on the push button to start a WiFi access point. Connect to it and open page http://192.168.1.4 to access the settings and the list of files. Files are downloadable and can be deleted.
 
- To save power, the ESP goes to light sleep when not recording, and wakes up when the button is pushed.
+ While recording, new files are created every X seconds, you can modify X on the settings page.
+
+ To save power, the ESP goes to light sleep when not recording, and wakes up when the button is pushed. The delay before sleeping can be set in the parameters.
 
  The led flashes quickly if the SD card is absent or can't be written, and it flashes slowly (every 2 seconds while recording)
 

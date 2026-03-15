@@ -54,6 +54,9 @@ const i2s_pin_config_t pin_config = {
   .data_in_num = I2S_SD_PIN
 };
 
+// Forward declarations
+void startRecording();
+void stopRecording();
 
 void setup() {
   Serial.begin(115200);
@@ -85,6 +88,19 @@ void setup() {
   
   // Initialize RecorderServer
   recorderServer = new RecorderServer(preferences, &sdCard);
+  recorderServer->setRecordingCallbacks(
+    []() { startRecording(); },
+    []() { stopRecording(); },
+    []() -> bool { return isRecording; }
+  );
+  
+  // Check if server should auto-start after restart
+  if (preferences->getSettingBool(PREF_RESTART_SERVER)) {
+    log_i("Auto-starting server after restart");
+    recorderServer->start();
+    led.setMode(threeTimesMode);
+    preferences->setSetting(PREF_RESTART_SERVER, false);  // Reset the flag
+  }
 }
 
 void startRecording() { 
@@ -163,6 +179,10 @@ void loop() {
       log_i("Web server started.");
     }
     lastActivation = millis();
+  } else if (buttonState == ButtonState::VERY_LONG_PRESS) {
+    log_i("Button held for 6+ seconds. Resetting ESP32...");
+    delay(500);
+    ESP.restart();
   }
   
 
@@ -183,7 +203,8 @@ void loop() {
     sdCard.write((uint8_t *)samples16, samplesCount * 2);
 
     // New file every X seconds.
-    if (millis() - lastFileSwitch > 60000) { 
+    int fileSwitchDelay = preferences->getSettingInt(PREF_FILE_SWITCH_DELAY_S) * 1000;
+    if (millis() - lastFileSwitch > (unsigned long)fileSwitchDelay) { 
       Serial.print("Switching recording file.");
       stopRecording();
       startRecording();

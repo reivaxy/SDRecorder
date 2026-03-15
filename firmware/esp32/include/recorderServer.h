@@ -8,6 +8,7 @@
 #include "sdCard.h"
 #include "recorderPreferences.h"
 #include <ArduinoJson.h>
+#include <functional>
 
 
 class RecorderServer {
@@ -19,12 +20,19 @@ public:
     void stop();
     void run();
     bool isRunning() const { return running; }
+    void setRecordingCallbacks(std::function<void()> startCb,
+                               std::function<void()> stopCb,
+                               std::function<bool()> isRecCb);
 
 private:
     WebServer server;
     RecorderPreferences* preferences;
     SDCard* sdCard;
     bool running;
+
+    std::function<void()> onStartRecording;
+    std::function<void()> onStopRecording;
+    std::function<bool()> getIsRecording;
     
     // Request handlers
     void handleRoot();
@@ -32,6 +40,13 @@ private:
     void handlePostSettingsApi();
     void handleNotFound();
     void handleSettings();
+    void handleFiles();
+    void handleDownload();
+    void handleDeleteFilesApi();
+    void handleStartRecordingApi();
+    void handleStopRecordingApi();
+    void handleGetRecordingStatusApi();
+    void handleRestartApi();
     
     // Helper methods
     String getSettingsJson();

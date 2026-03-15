@@ -18,7 +18,7 @@ const char* RECORDER_CSS = R"(
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 5px;
     }
     .container {
         background: white;
@@ -26,11 +26,15 @@ const char* RECORDER_CSS = R"(
         box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         max-width: 600px;
         width: 100%;
-        padding: 40px;
+        padding: 20px;
     }
     h1 {
         color: #333;
-        margin-bottom: 30px;
+        text-align: center;
+    }
+    h2 {
+        color: #333;
+        margin-bottom: 12px;
         text-align: center;
     }
     .settings-section {
@@ -132,6 +136,73 @@ const char* RECORDER_CSS = R"(
         margin: 0;
         flex: 1;
         cursor: pointer;
+    }
+    .file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .file-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .file-list li:last-child {
+        border-bottom: none;
+    }
+    .file-list a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .file-list a::before {
+        content: '\1F3B5';
+    }
+    .file-list a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    .file-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .file-size {
+        color: #999;
+        font-size: 13px;
+        white-space: nowrap;
+        margin-left: 12px;
+    }
+    .recording-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ccc;
+        margin-right: 6px;
+        vertical-align: middle;
+    }
+    .recording-indicator.active {
+        background: #dc3545;
+        animation: rec-blink 1s infinite;
+    }
+    @keyframes rec-blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.3; }
+    }
+    button.btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    button.btn-success:hover {
+        box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+    }
+    button.btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    button.btn-danger:hover {
+        box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
     }
   </style>
 )";
