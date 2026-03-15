@@ -60,11 +60,11 @@ Main dashboard for recording control and quick status overview
 - Start/stop recording controls
 - Quick access to settings and file management
 
-<img src="img/Screenshot_20260315-211552.jpg" width="320px" alt="Home Page">
+<img src="img/Screenshot_20260315-221351.jpg" width="320px" alt="Home Page">
 
 After pressing the "Start Recording" button:
 
-<img src="img/Screenshot_20260315-211536.jpg" width="320px" alt="While recording">
+<img src="img/Screenshot_20260315-221409.jpg" width="320px" alt="While recording">
 
 #### Settings Page (`/settings`)
 Configure device behavior and preferences:
@@ -106,5 +106,3 @@ Check the firmware/pc folder in this repository.
 Here is the current prototype, awaiting PCB v1. A future v2 may feature an RGB LED for more detailed status indication.
 
 ![20260308_143006](https://github.com/user-attachments/assets/27d30efa-58a1-4632-96ae-dd62605cc028)
-
-*Screen captures of the web interface pages coming soon.*

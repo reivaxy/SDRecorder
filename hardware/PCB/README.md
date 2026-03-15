@@ -12,6 +12,8 @@ Simply upload the Gerber files to your chosen PCB manufacturer's website. The Ge
 
 ## PCB Views
 
+Dimensions: 51.9 mm* 21.7 mm
+
 Top side
 
 <img src="img/topSide.jpg" alt="Top Side" width="400" />

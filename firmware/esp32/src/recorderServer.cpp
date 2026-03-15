@@ -523,12 +523,12 @@ String RecorderServer::getHtmlPage() {
             <h2>Usage Instructions</h2>
             
             <div class="form-group">
-                <label>📹 Short Button Press</label>
+                <label>🎤 Short Button Press</label>
                 <p class="instruction-text-bottom">Start or stop recording audio to the SD card</p>
             </div>
             
             <div class="form-group">
-                <label>🔧 Long Button Press (2+ seconds)</label>
+                <label>🛜 Long Button Press (2+ seconds)</label>
                 <p class="instruction-text">Start or stop the WiFi acces point and server for remote control</p>
             </div>
         </div>
