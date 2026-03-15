@@ -5,14 +5,14 @@
 #include <WebServer.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
-#include <Preferences.h>
 #include "sdCard.h"
+#include "recorderPreferences.h"
 #include <ArduinoJson.h>
 
 
 class RecorderServer {
 public:
-    RecorderServer(Preferences* settings, SDCard* sdCard);
+    RecorderServer(RecorderPreferences* preferences, SDCard* sdCard);
     ~RecorderServer();
     
     void start();
@@ -22,7 +22,7 @@ public:
 
 private:
     WebServer server;
-    Preferences* settings;
+    RecorderPreferences* preferences;
     SDCard* sdCard;
     bool running;
     

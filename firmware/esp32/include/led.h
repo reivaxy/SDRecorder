@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+class RecorderPreferences;  // Forward declaration
+
 class BlinkMode {
 public:
     BlinkMode(unsigned long onDuration, unsigned long offDuration, int maxBlinks = 0);
@@ -19,18 +21,29 @@ private:
 class Led {
 public:
     Led(int pin);
+    void setPreferences(RecorderPreferences* prefs) { preferences = prefs; }
     void setMode(const BlinkMode mode);
     void off();
     void run();
 
+    // Mode stack: supports pushing temporary modes that restore previous modes
+    struct ModeEntry {
+        ModeEntry() : mode(0,0,0), lastToggleTime(0), isOn(false), modeOff(false), currentInterval(0), blinkCount(0) {}
+        BlinkMode mode;
+        unsigned long lastToggleTime;
+        bool isOn;
+        bool modeOff;
+        unsigned long currentInterval;
+        int blinkCount;
+    };
+
+    static const int MODE_STACK_MAX = 4;
+
 private:
     int pin;
-    BlinkMode currentMode;
-    unsigned long lastToggleTime;
-    bool isOn; // blinking state
-    bool modeOff;
-    unsigned long currentInterval;
-    int blinkCount;
+    ModeEntry stack[MODE_STACK_MAX];
+    int stackSize; // number of valid entries in stack (0..MODE_STACK_MAX)
+    RecorderPreferences* preferences;
 };
 
 #endif

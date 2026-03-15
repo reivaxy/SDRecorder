@@ -1,5 +1,6 @@
 #include "main.h"
 #include "recorderServer.h"
+#include "recorderPreferences.h"
 
 #define I2S_BCK_PIN D1
 #define I2S_WS_PIN D2
@@ -14,7 +15,6 @@
 #define LED_PIN D4
 
 #define I2S_NUM I2S_NUM_0
-#define DEFAULT_SLEEP_DELAY 30000
 
 bool isRecording = false;
 unsigned long lastBlinkTime = 0;
@@ -30,7 +30,7 @@ BlinkMode twiceMode(400, 400, 2);      // 400ms on/off, 2 blinks max
 BlinkMode threeTimesMode(100, 100, 3);    // 200ms on/off, 3 blinks max
 SDCard sdCard(SD_CS_PIN, SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN);
 Button button(BUTTON_PIN);
-Preferences settings;
+RecorderPreferences* preferences = nullptr;
 RecorderServer* recorderServer = nullptr;
  
 const i2s_config_t i2s_config = {
@@ -64,8 +64,11 @@ void setup() {
   btStop();
   
   // Initialize preferences
-  settings.begin("SDRecorder", false);
-   
+  preferences = new RecorderPreferences();
+  
+  // Pass preferences to LED
+  led.setPreferences(preferences);
+
   sdPresent = SD.begin(SD_CS_PIN);
   if (!sdPresent) {
     log_e("SD Card initialization failed");
@@ -81,7 +84,7 @@ void setup() {
   }
   
   // Initialize RecorderServer
-  recorderServer = new RecorderServer(&settings, &sdCard);
+  recorderServer = new RecorderServer(preferences, &sdCard);
 }
 
 void startRecording() { 
@@ -118,7 +121,8 @@ void loop() {
   // when not recording for a while, enter light sleep mode to save power.
   // Keep delay long enough, sleep messes up the Serial connection 
   // and prevents uploading new code even after reset, until the next unplug/plug.
-  if (millis() - lastActivation > 3000000 && !recorderServer->isRunning()) {
+  int sleepDelay = preferences->getSettingInt(PREF_SLEEP_DELAY_S) * 1000;
+  if (millis() - lastActivation > sleepDelay && !recorderServer->isRunning()) {
     log_i("No activity, going to light sleep...");
     fflush(stdout);
     gpio_wakeup_enable(GPIO_NUM_5, GPIO_INTR_LOW_LEVEL);
@@ -150,6 +154,9 @@ void loop() {
       led.setMode(threeTimesMode);
       recorderServer->stop();
       log_i("Web server stopped.");
+      if (isRecording) {
+        led.setMode(slowMode);
+      }
     } else {
       led.setMode(threeTimesMode);
       recorderServer->start();

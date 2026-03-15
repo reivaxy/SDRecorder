@@ -117,6 +117,22 @@ const char* RECORDER_CSS = R"(
     button + button {
         margin-top: 10px;
     }
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+    }
+    .checkbox-container input[type="checkbox"] {
+        width: auto;
+        margin-right: 10px;
+        cursor: pointer;
+        height: 18px;
+        width: 18px;
+    }
+    .checkbox-container label {
+        margin: 0;
+        flex: 1;
+        cursor: pointer;
+    }
   </style>
 )";
 

@@ -1,8 +1,8 @@
 #include "recorderServer.h"
 #include "styles.h"
 
-RecorderServer::RecorderServer(Preferences* settings, SDCard* sdCard)
-    : server(80), settings(settings), sdCard(sdCard), running(false) {
+RecorderServer::RecorderServer(RecorderPreferences* preferences, SDCard* sdCard)
+    : server(80), preferences(preferences), sdCard(sdCard), running(false) {
 }
 
 RecorderServer::~RecorderServer() {
@@ -19,8 +19,8 @@ void RecorderServer::start() {
     WiFi.mode(WIFI_AP);
     
     // Configure AP with default credentials
-    String ssid = settings->getString("ap_ssid", "SDRecorder");
-    String password = settings->getString("ap_password", "12345678");
+    String ssid = preferences->getSettingString(PREF_AP_SSID);
+    String password = preferences->getSettingString(PREF_AP_PASSWORD);
     log_i("Starting AP with SSID: %s", ssid.c_str());
     
     if (!WiFi.softAP(ssid, password)) {
@@ -96,14 +96,37 @@ void RecorderServer::handleNotFound() {
 
 String RecorderServer::getSettingsJson() {
     StaticJsonDocument<512> doc;
+    size_t prefCount;
+    const RecorderPreferences::SettingMetadata* metadata = RecorderPreferences::getSettingsMetadata(prefCount);
     
-    doc["ap_ssid"] = settings->getString("ap_ssid", "SDRecorder");
-    doc["ap_password"] = settings->getString("ap_password", "12345678");
-    doc["sample_rate"] = settings->getInt("sample_rate", SAMPLE_RATE);
-    doc["device_name"] = settings->getString("device_name", "SDRecorder");
+    // Create a combined structure with metadata and values
+    StaticJsonDocument<1024> fullDoc;
+    JsonObject metadataObj = fullDoc.createNestedObject("metadata");
+    JsonObject valuesObj = fullDoc.createNestedObject("values");
+    
+    // Dynamically add all preferences metadata and values to JSON doc
+    for (size_t i = 0; i < prefCount; i++) {
+        const RecorderPreferences::SettingMetadata& meta = metadata[i];
+        
+        // Add metadata
+        JsonObject metaItem = metadataObj.createNestedObject(meta.name);
+        metaItem["label"] = meta.label;
+        metaItem["type"] = meta.type;
+        
+        // Add value
+        if (strcmp(meta.type, "int") == 0) {
+            valuesObj[meta.name] = preferences->getSettingInt(meta.name);
+        } else if (strcmp(meta.type, "float") == 0) {
+            valuesObj[meta.name] = preferences->getSettingFloat(meta.name);
+        } else if (strcmp(meta.type, "bool") == 0) {
+            valuesObj[meta.name] = preferences->getSettingBool(meta.name);
+        } else {
+            valuesObj[meta.name] = preferences->getSettingString(meta.name);
+        }
+    }
     
     String json;
-    serializeJson(doc, json);
+    serializeJson(fullDoc, json);
     return json;
 }
 
@@ -116,17 +139,24 @@ void RecorderServer::setSettingsFromJson(const String& json) {
         return;
     }
     
-    if (doc.containsKey("ap_ssid")) {
-        settings->putString("ap_ssid", doc["ap_ssid"].as<String>());
-    }
-    if (doc.containsKey("ap_password")) {
-        settings->putString("ap_password", doc["ap_password"].as<String>());
-    }
-    if (doc.containsKey("device_name")) {
-        settings->putString("device_name", doc["device_name"].as<String>());
-    }
-    if (doc.containsKey("sample_rate")) {
-        settings->putInt("sample_rate", doc["sample_rate"].as<int>());
+    size_t prefCount;
+    const RecorderPreferences::SettingMetadata* metadata = RecorderPreferences::getSettingsMetadata(prefCount);
+    
+    // Iterate through metadata and update settings from JSON
+    for (size_t i = 0; i < prefCount; i++) {
+        const RecorderPreferences::SettingMetadata& meta = metadata[i];
+        
+        if (doc.containsKey(meta.name)) {
+            if (strcmp(meta.type, "int") == 0) {
+                preferences->setSetting(meta.name, doc[meta.name].as<int>());
+            } else if (strcmp(meta.type, "float") == 0) {
+                preferences->setSetting(meta.name, doc[meta.name].as<float>());
+            } else if (strcmp(meta.type, "bool") == 0) {
+                preferences->setSetting(meta.name, doc[meta.name].as<bool>());
+            } else {
+                preferences->setSetting(meta.name, doc[meta.name].as<String>());
+            }
+        }
     }
     
     log_i("Settings updated");
@@ -177,7 +207,7 @@ String RecorderServer::getHtmlPage() {
             fetch('/apis/settings')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('device-name').textContent = data.device_name || 'SDRecorder';
+                    document.getElementById('device-name').textContent = data.values.device_name || 'SDRecorder';
                 })
                 .catch(error => {
                     console.error('Error loading device info:', error);
@@ -205,48 +235,105 @@ String RecorderServer::getSettingsHtmlPage() {
     <div class="container">
         <h1>ESP32 Recorder Settings</h1>
         
-        <div class="settings-section">
-            <div class="form-group">
-                <label for="device_name">Device Name</label>
-                <input type="text" id="device_name" placeholder="ESP32-Recorder">
-            </div>
-            
-            <div class="form-group">
-                <label for="ap_ssid">WiFi Network Name (SSID)</label>
-                <input type="text" id="ap_ssid" placeholder="ESP32-Recorder">
-            </div>
-            
-            <div class="form-group">
-                <label for="ap_password">WiFi Password</label>
-                <input type="password" id="ap_password" placeholder="12345678">
-            </div>
-            
-            <div class="form-group">
-                <label for="sample_rate">Sample Rate</label>
-                <select id="sample_rate">
-                    <option value="16000">16000 Hz</option>
-                    <option value="32000">32000 Hz</option>
-                    <option value="48000">48000 Hz (Default)</option>
-                </select>
-            </div>
-            
-            <button onclick='saveSettings()'>Save Settings</button>
-            <div id="status" class="status"></div>
+        <div class="settings-section" id="settings-form">
+            <!-- Form will be generated dynamically -->
         </div>
+        
+        <button onclick='saveSettings()'>Save Settings</button>
+        <div id="status" class="status"></div>
     </div>
     
     <script>
         // Load settings on page load
         window.addEventListener('load', loadSettings);
         
+        function detectType(typeStr) {
+            if (typeStr === 'boolean' || typeStr === 'bool') {
+                return 'boolean';
+            }
+            if (typeStr === 'int' || typeStr === 'integer') {
+                return 'integer';
+            }
+            if (typeStr === 'float') {
+                return 'float';
+            }
+            return 'string';
+        }
+        
+        function createFormField(key, value, label, typeStr) {
+            const type = detectType(typeStr);
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group';
+            
+            if (type === 'boolean') {
+                // Create checkbox
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = key;
+                input.checked = value;
+                
+                const labelEl = document.createElement('label');
+                labelEl.htmlFor = key;
+                labelEl.textContent = label;
+                
+                checkboxContainer.appendChild(input);
+                checkboxContainer.appendChild(labelEl);
+                formGroup.appendChild(checkboxContainer);
+            } else {
+                // Create text, number, or password input
+                const labelEl = document.createElement('label');
+                labelEl.htmlFor = key;
+                labelEl.textContent = label;
+                formGroup.appendChild(labelEl);
+                
+                const input = document.createElement('input');
+                input.id = key;
+                
+                if (type === 'integer' || type === 'float') {
+                    input.type = 'number';
+                    if (type === 'float') {
+                        input.step = '0.01';
+                    }
+                } else {
+                    // Determine if password field based on key name
+                    if (key.includes('password')) {
+                        input.type = 'password';
+                    } else {
+                        input.type = 'text';
+                    }
+                }
+                
+                input.value = value;
+                input.placeholder = label;
+                formGroup.appendChild(input);
+            }
+            
+            return formGroup;
+        }
+        
         function loadSettings() {
             fetch('/apis/settings')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('device_name').value = data.device_name || 'ESP32-Recorder';
-                    document.getElementById('ap_ssid').value = data.ap_ssid || 'ESP32-Recorder';
-                    document.getElementById('ap_password').value = data.ap_password || '12345678';
-                    document.getElementById('sample_rate').value = data.sample_rate || 48000;
+                    const formContainer = document.getElementById('settings-form');
+                    formContainer.innerHTML = ''; // Clear existing fields
+                    
+                    // Iterate through all values and create form fields using metadata
+                    const values = data.values || {};
+                    const metadata = data.metadata || {};
+                    
+                    for (const key in values) {
+                        if (values.hasOwnProperty(key)) {
+                            const meta = metadata[key] || {};
+                            const label = meta.label || key;
+                            const type = meta.type || 'string';
+                            const formField = createFormField(key, values[key], label, type);
+                            formContainer.appendChild(formField);
+                        }
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading settings:', error);
@@ -255,12 +342,20 @@ String RecorderServer::getSettingsHtmlPage() {
         }
         
         function saveSettings() {
-            const settings = {
-                device_name: document.getElementById('device_name').value,
-                ap_ssid: document.getElementById('ap_ssid').value,
-                ap_password: document.getElementById('ap_password').value,
-                sample_rate: parseInt(document.getElementById('sample_rate').value)
-            };
+            const formContainer = document.getElementById('settings-form');
+            const inputs = formContainer.querySelectorAll('input');
+            const settings = {};
+            
+            inputs.forEach(input => {
+                const key = input.id;
+                if (input.type === 'checkbox') {
+                    settings[key] = input.checked;
+                } else if (input.type === 'number') {
+                    settings[key] = parseFloat(input.value);
+                } else {
+                    settings[key] = input.value;
+                }
+            });
             
             fetch('/apis/settings', {
                 method: 'POST',
