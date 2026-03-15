@@ -60,9 +60,11 @@ Main dashboard for recording control and quick status overview
 - Start/stop recording controls
 - Quick access to settings and file management
 
-![Home Page](img/Screenshot_20260315-211552.jpg)
+<img src="img/Screenshot_20260315-211552.jpg" width="320px" alt="Home Page">
 
-![While recording](img/Screenshot_20260315-211536.jpg)
+After pressing the "Start Recording" button:
+
+<img src="img/Screenshot_20260315-211536.jpg" width="320px" alt="While recording">
 
 #### Settings Page (`/settings`)
 Configure device behavior and preferences:
@@ -72,7 +74,7 @@ Configure device behavior and preferences:
 - **Server Auto-Start**: Enable/disable WiFi server startup after device restart
 - Save and apply changes to persistent storage
 
-![alt text](img/Screenshot_20260315-211616.jpg)
+<img src="img/Screenshot_20260315-211616.jpg" width="320px" alt="Settings Page">
 
 #### Files Page (`/files`)
 Manage recorded audio files:
@@ -81,7 +83,7 @@ Manage recorded audio files:
 - Delete individual files or manage storage space
 - See file creation dates and recording duration information
 
-![alt text](img/Screenshot_20260315-211649.jpg)
+<img src="img/Screenshot_20260315-211649.jpg" width="320px" alt="Files Page">
 
 ### API Endpoints (for advanced users)
 
