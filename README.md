@@ -79,7 +79,7 @@ Configure device behavior and preferences:
 #### Files Page (`/files`)
 Manage recorded audio files:
 - View list of all recordings on the SD card with file sizes
-- Download files directly to your computer
+- Download files directly to your moile phone or computer
 - Delete individual files or manage storage space
 - See file creation dates and recording duration information
 
@@ -94,6 +94,12 @@ Manage recorded audio files:
 - `GET /apis/recording/status` - Get current recording status
 - `POST /apis/files/delete` - Delete files
 - `POST /apis/system/restart` - Restart the device
+
+### Tools
+
+A python script opens a UI allowing to select a source folder containing .wav files and stich them into one single .wav file.
+This is handy in case you use the automatic file switching feature. 
+Check the firmware/pc folder in this repository.
 
 ## Hardware Prototype
 
