@@ -6,7 +6,7 @@ A compact ESP32-based audio recording device with SD card storage, WiFi web inte
 
 SDRecorder is a battery-powered audio recorder that captures WAV files to an SD card. The device features a simple push-button interface for recording control, an LED status indicator, and a web-based interface for settings management and file access. The design prioritizes low power consumption through intelligent sleep modes.
 
-*About 90% of the code was written by Claude Haiku 4.5 through GitHub Copilot, with minimal editing.*
+*About 90% of the code and this README was written by Claude Haiku 4.5 through GitHub Copilot, with minimal editing.*
 
 ## Features
 
