@@ -1,16 +1,17 @@
 # SDRecorder
 
+*About 90% of the code and this README was written by Claude Haiku 4.5 through GitHub Copilot, with minimal editing.*
+
 A compact ESP32-based audio recording device with SD card storage, WiFi web interface, and power-efficient operation for portable recording applications.
 
 ## Overview
 
 SDRecorder is a battery-powered audio recorder that captures WAV files to an SD card. The device features a simple push-button interface for recording control, an LED status indicator, and a web-based interface for settings management and file access. The design prioritizes low power consumption through intelligent sleep modes.
 
-*About 90% of the code and this README was written by Claude Haiku 4.5 through GitHub Copilot, with minimal editing.*
 
 ## Features
 
-- **Audio Recording**: Captures high-quality audio to SD card in WAV format
+- **Audio Recording**: Captures audio to SD card in WAV format
 - **Automatic File Rotation**: Creates new recording files at configurable intervals to optimize storage and prevent extremely large files
 - **Web-Based Interface**: Access settings, view recordings, and manage files through a WiFi access point
 - **Power Efficiency**: ESP32 enters light sleep mode when idle to extend battery life
@@ -31,7 +32,7 @@ The single push button provides three levels of interaction:
 ### Long Press (2+ seconds)
 - **Hold for 2 seconds but less than 6**: Start the WiFi access point
 - Once activated, the device creates a WiFi network you can connect to
-- Default SSID and password can be configured via the web interface
+- Default SSID and password can be configured via the web interface at http://192.168.1.4
 
 ### Very long press (6+ seconds)
 - reset the ESP32
@@ -78,12 +79,11 @@ Configure device behavior and preferences:
 
 #### Files Page (`/files`)
 Manage recorded audio files:
-- View list of all recordings on the SD card with file sizes
-- Download files directly to your moile phone or computer
+- View list of all recordings on the SD card with file sizes and date
+- Download files directly to your mobile phone or computer
 - Delete individual files or manage storage space
-- See file creation dates and recording duration information
 
-<img src="img/Screenshot_20260315-211649.jpg" width="320px" alt="Files Page">
+<img src="img/fileList.jpg" width="320px" alt="Files Page">
 
 ### API Endpoints (for advanced users)
 
@@ -94,6 +94,8 @@ Manage recorded audio files:
 - `GET /apis/recording/status` - Get current recording status
 - `POST /apis/files/delete` - Delete files
 - `POST /apis/system/restart` - Restart the device
+- `POST /apis/system/time` - Set the device time (accepts timestamp in JSON body)
+- `GET /apis/system/time` - Get the current device time and RTC status
 
 ### Tools
 
