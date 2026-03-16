@@ -5,7 +5,10 @@ SDCard::SDCard(int csPin, int sckPin, int misoPin, int mosiPin)
     memset(fileNames, 0, sizeof(fileNames));
 }
 
-bool SDCard::begin() {
+bool SDCard::begin(RecorderPreferences* prefs, RTC* rtc) {
+    preferences = prefs;
+    this->rtc = rtc;
+    loadFileIndex();
     SPI.begin(sckPin, misoPin, mosiPin, csPin);
     return SD.begin(csPin);
 }
@@ -24,10 +27,16 @@ void SDCard::closeCurrentFile() {
 }
 
 boolean SDCard::initNewFile() {
-  while (SD.exists("/rec" + String(fileIndex) + ".wav")) {
+  char fileName[32];
+  while (true) {
+    sprintf(fileName, "/rec%03d.wav", fileIndex);
+    if (!SD.exists(fileName)) {
+      break;
+    }
     fileIndex++;
   }
-  currentFileName = "/rec" + String(fileIndex) + ".wav";
+  saveFileIndex();
+  currentFileName = String(fileName);
   log_i("Initializing new file: %s", currentFileName.c_str());
   currentFile = SD.open(currentFileName.c_str(), FILE_WRITE);
   if (!currentFile) {
@@ -199,4 +208,21 @@ const char* SDCard::getFileName(int index) {
         return nullptr;
     }
     return fileNames[index];
+}
+
+void SDCard::saveFileIndex() {
+    if (preferences) {
+        preferences->setSetting(PREF_FILE_INDEX, fileIndex);
+        log_i("File index saved to preferences: %d", fileIndex);
+    }
+}
+
+void SDCard::loadFileIndex() {
+    if (preferences) {
+        fileIndex = preferences->getSettingInt(PREF_FILE_INDEX);
+        log_i("File index loaded from preferences: %d", fileIndex);
+    } else {
+        fileIndex = PREF_FILE_INDEX_DEFAULT;
+        log_w("Preferences not available, using default file index: %d", fileIndex);
+    }
 }

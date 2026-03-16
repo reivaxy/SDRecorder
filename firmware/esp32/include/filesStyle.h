@@ -12,7 +12,7 @@ const char* FILES_CSS = R"(
     .file-item {
         display: flex;
         align-items: center;
-        padding: 10px;
+        padding: 2px;
         border-bottom: 1px solid #ddd;
     }
     .file-checkbox {
@@ -36,8 +36,14 @@ const char* FILES_CSS = R"(
     }
     .file-size {
         color: #666;
-        font-size: 0.9em;
-        margin-left: 15px;
+        font-size: 0.7em;
+        margin-left: 10px;
+        white-space: nowrap;
+    }
+    .file-date {
+        color: #999;
+        font-size: 0.7em;
+        margin-left: 10px;
         white-space: nowrap;
     }
     .delete-section {

@@ -1,6 +1,7 @@
 #include "main.h"
 #include "recorderServer.h"
 #include "recorderPreferences.h"
+#include "rtc.h"
 
 #define I2S_BCK_PIN D1
 #define I2S_WS_PIN D2
@@ -32,6 +33,7 @@ SDCard sdCard(SD_CS_PIN, SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN);
 Button button(BUTTON_PIN);
 RecorderPreferences* preferences = nullptr;
 RecorderServer* recorderServer = nullptr;
+RTC* rtc = nullptr;
  
 const i2s_config_t i2s_config = {
   .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_TX),
@@ -72,11 +74,17 @@ void setup() {
   // Pass preferences to LED
   led.setPreferences(preferences);
 
-  sdPresent = SD.begin(SD_CS_PIN);
-  if (!sdPresent) {
+  // Initialize RTC
+  rtc = new RTC();
+  log_i("RTC initialized (waiting for time synchronization)");
+
+  // Initialize SDCard with preferences and RTC
+  if (!sdCard.begin(preferences, rtc)) {
     log_e("SD Card initialization failed");
+    sdPresent = false;
     led.setMode(fastMode);
   } else {
+    sdPresent = true;
     Serial.println("SD Card Ready.");
     i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
     i2s_set_pin(I2S_NUM, &pin_config);
@@ -86,8 +94,8 @@ void setup() {
     lastActivation = millis();
   }
   
-  // Initialize RecorderServer
-  recorderServer = new RecorderServer(preferences, &sdCard);
+  // Initialize RecorderServer with RTC
+  recorderServer = new RecorderServer(preferences, &sdCard, rtc);
   recorderServer->setRecordingCallbacks(
     []() { startRecording(); },
     []() { stopRecording(); },

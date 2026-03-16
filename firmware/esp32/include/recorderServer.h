@@ -7,13 +7,14 @@
 #include <esp_event.h>
 #include "sdCard.h"
 #include "recorderPreferences.h"
+#include "rtc.h"
 #include <ArduinoJson.h>
 #include <functional>
 
 
 class RecorderServer {
 public:
-    RecorderServer(RecorderPreferences* preferences, SDCard* sdCard);
+    RecorderServer(RecorderPreferences* preferences, SDCard* sdCard, RTC* rtc);
     ~RecorderServer();
     
     void start();
@@ -28,6 +29,7 @@ private:
     WebServer server;
     RecorderPreferences* preferences;
     SDCard* sdCard;
+    RTC* rtc;
     bool running;
 
     std::function<void()> onStartRecording;
@@ -40,18 +42,20 @@ private:
     void handlePostSettingsApi();
     void handleNotFound();
     void handleSettings();
-    void handleFiles();
+    void getFilesHtmlPage();
     void handleDownload();
     void handleDeleteFilesApi();
     void handleStartRecordingApi();
     void handleStopRecordingApi();
     void handleGetRecordingStatusApi();
     void handleRestartApi();
+    void handleSetTimeApi();
+    void handleGetTimeApi();
     
     // Helper methods
     String getSettingsJson();
     void setSettingsFromJson(const String& json);
-    String getHtmlPage();
+    String getHomeHtmlPage();
     String getSettingsHtmlPage();
 };
 

@@ -4,6 +4,8 @@
 #include <SD.h>
 #include <SPI.h>
 #include <FS.h>
+#include "recorderPreferences.h"
+#include "rtc.h"
 
 
 #define SAMPLE_RATE 48000  // DVD quality
@@ -13,7 +15,7 @@
 class SDCard {
 public:
     SDCard(int csPin, int sckPin, int misoPin, int mosiPin);
-    bool begin();
+    bool begin(RecorderPreferences* prefs = nullptr, RTC* rtc = nullptr);
     void write(const uint8_t* buf, size_t size);
     void closeCurrentFile();
     void writeWavHeader(int sampleRate, int bitsPerSample, int channels, int dataSize);
@@ -35,6 +37,11 @@ private:
     String currentFileName;
     char* fileNames[MAX_FILES];
     int fileCount = 0;
+    RecorderPreferences* preferences = nullptr;
+    RTC* rtc = nullptr;
+    
+    void saveFileIndex();
+    void loadFileIndex();
 
 };
 

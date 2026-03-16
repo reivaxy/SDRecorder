@@ -9,6 +9,7 @@ const RecorderPreferences::SettingMetadata RecorderPreferences::settingsMetadata
   {PREF_FILE_SWITCH_DELAY_S, "int", nullptr, PREF_FILE_SWITCH_DELAY_DEFAULT, 0.0f, false, "File Switch Delay (s)"},
   {PREF_AP_SSID, "string", PREF_AP_SSID_DEFAULT, 0, 0.0f, false, "Access Point SSID"},
   {PREF_AP_PASSWORD, "string", PREF_AP_PASSWORD_DEFAULT, 0, 0.0f, false, "Access Point Password"},
+  {PREF_FILE_INDEX, "int", nullptr, PREF_FILE_INDEX_DEFAULT, 0.0f, false, "File Index"},
 };
 
 const size_t RecorderPreferences::settingsMetadataSize = 

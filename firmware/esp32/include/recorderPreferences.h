@@ -31,6 +31,10 @@
 #define PREF_RESTART_SERVER "restart_server"
 #define PREF_RESTART_SERVER_DEFAULT false
 
+// File index preference
+#define PREF_FILE_INDEX "file_index"
+#define PREF_FILE_INDEX_DEFAULT 1
+
 
 
 class RecorderPreferences {
