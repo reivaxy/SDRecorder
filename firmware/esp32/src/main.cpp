@@ -12,8 +12,8 @@
 #define SD_MISO_PIN MISO
 #define SD_SCK_PIN SCK
 
-#define BUTTON_PIN D3
-#define LED_PIN D4
+#define BUTTON_PIN D4
+#define LED_PIN D5
 
 #define I2S_NUM I2S_NUM_0
 
