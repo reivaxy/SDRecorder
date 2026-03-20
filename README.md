@@ -1,8 +1,12 @@
 # SDRecorder
 
-*About 90% of the code and this README was written by Claude Haiku 4.5 through GitHub Copilot, with minimal editing.*
+*About 90% of the code and this README was written by Claude Haiku 4.5 through GitHub Copilot in VSC, with minimal editing.*
+
 
 A compact ESP32-based audio recording device with SD card storage, WiFi web interface, and power-efficient operation for portable recording applications.
+
+<img src="img/proto2a.jpg" width="320px" alt="pcb prototype"> 
+<img src="img/proto2b.jpg" width="320px" alt="pcb prototype">
 
 ## Overview
 
@@ -105,6 +109,7 @@ Check the firmware/pc folder in this repository.
 
 ## Hardware Prototype
 
-Here is the current prototype, awaiting PCB v1. A future v2 may feature an RGB LED for more detailed status indication.
+Here is the early breadboard prototype.
 
 ![20260308_143006](https://github.com/user-attachments/assets/27d30efa-58a1-4632-96ae-dd62605cc028)
+
