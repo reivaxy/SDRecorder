@@ -10,6 +10,13 @@ The push button print is not right for the push button I had in stock, and the m
 
 Simply upload the Gerber files to your chosen PCB manufacturer's website. The Gerber files contain all the necessary information for fabrication including traces, layers, holes, and other manufacturing specifications.
 
+## Assembly
+
+Three tricky parts:
+- the battery pads underneath the ESP32: Put the ESP32 in place and make sure it does not move, then from the other side of the PCB heat the holes joining the pads and put solder. It worked for me. Alternatively, use solder paste and hot air, but I didn't try it yet.
+- the SD board: soldered without pins, just heat the holes and put solder from the top, capilarity will do the rest.
+- the microphone board: will be similar in the next pcb version, for now mount it on pins but the pins should not emerge on the other side of the pcb since the battery rests agains the pcb.
+
 ## Schematics
 
 <img src="img/schematics.jpg" alt="Schematics" width="400" />
