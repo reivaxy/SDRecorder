@@ -8,6 +8,11 @@ A compact ESP32-based audio recording device with SD card storage, WiFi web inte
 <img src="img/proto2a.jpg" width="320px" alt="pcb prototype"> 
 <img src="img/proto2b.jpg" width="320px" alt="pcb prototype">
 
+Here is version 2 with its case:
+
+<img src="img/20260418_183106.jpg" height="240px" alt="pcb prototype">
+<img src="img/20260418_183711.jpg" height="240px" alt="pcb prototype">
+
 Check this recorded sample:
 
 [rec004.wav](https://github.com/user-attachments/files/26235473/rec004.wav)
